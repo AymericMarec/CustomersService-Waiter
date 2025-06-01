@@ -1,31 +1,25 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../styles/ReadyCommand';
-
-const CurrentOrders = [
-  {
-    id: '1',
-    table: 12,
-    dishes: ['Burger', 'Frites', 'Coca-Cola'],
-  },
-  {
-    id: '2',
-    table: 7,
-    dishes: ['Pizza Margherita', 'Eau gazeuse'],
-  },
-  {
-    id: '3',
-    table: 3,
-    dishes: ['Salade César', 'Jus d’orange'],
-  },
-];
+import { Order } from '../types/order';
 
 export default function ReadyCommand() {
+  const ws = useRef<WebSocket | null>(null);
+  const [orders,setorders] = useState<Order[]>([])
+  ws.current = new WebSocket('wss://exemple.com/socket');
+
+  ws.current.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+      setorders([...orders,data])
+  };
+
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Commandes prêtes</Text>
-      {CurrentOrders.map((order) => (
-        <View key={order.id} style={styles.card}>
+      {orders.map((order) => (
+        <View key={order.type} style={styles.card}>
           <View style={styles.header}>
             <Ionicons name="restaurant" size={28} color="#fff" style={{ marginRight: 8 }} />
             <Text style={styles.tableNumber}>Table {order.table}</Text>
