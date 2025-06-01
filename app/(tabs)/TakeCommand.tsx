@@ -20,6 +20,7 @@ export default function TakeCommandScreen() {
   const [showItemModal, setShowItemModal] = useState(false);
   const [showCartModal, setShowCartModal] = useState(false);
   const [menu,setMenu] = useState<Menu | null>(null);
+  const [tableNumber, setTableNumber] = useState('');
 
   const categories = ['Apéritifs', 'Boissons', 'Entrées', 'Plats', 'Desserts'];
 
@@ -44,6 +45,27 @@ export default function TakeCommandScreen() {
       setComments('');
     }
   };
+
+  const SendOrder = () => {
+    if (!tableNumber) {
+      alert('Veuillez saisir un numéro de table');
+      return;
+    }
+    fetch(API_URL+'/api/orders', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "tableNumber": parseInt(tableNumber),
+            "order":cart
+        })
+    })
+    setCart([]);
+    setTableNumber('');
+    setShowCartModal(false)
+  }
+
 
   const removeFromCart = (index: number) => {
     setCart(cart.filter((_, i) => i !== index));
@@ -197,6 +219,14 @@ export default function TakeCommandScreen() {
               <Ionicons name="close" size={28} color="#fff" />
             </TouchableOpacity>
             <ThemedText style={styles.modalTitle}>Votre Commande</ThemedText>
+            <TextInput
+              style={styles.commentsInput}
+              placeholder="Numéro de table..."
+              placeholderTextColor="#888"
+              value={tableNumber}
+              onChangeText={setTableNumber}
+              keyboardType="numeric"
+            />
             <ScrollView style={styles.cartItems}>
               {cart.map((item, index) => (
                 <View key={index} style={styles.cartItemRow}>
@@ -215,7 +245,7 @@ export default function TakeCommandScreen() {
               <ThemedText style={styles.cartTotalText}>Total: {getTotal()} €</ThemedText>
             </View>
             <TouchableOpacity style={styles.confirmButton}>
-              <ThemedText style={styles.confirmButtonText}>Confirmer la commande</ThemedText>
+              <ThemedText style={styles.confirmButtonText} onPress={SendOrder}>Confirmer la commande</ThemedText>
             </TouchableOpacity>
           </View>
         </View>
