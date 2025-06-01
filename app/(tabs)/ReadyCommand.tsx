@@ -7,7 +7,11 @@ import { Order } from '../types/order';
 export default function ReadyCommand() {
   const ws = useRef<WebSocket | null>(null);
   const [orders,setorders] = useState<Order[]>([])
-  ws.current = new WebSocket('wss://exemple.com/socket');
+  ws.current = new WebSocket('ws://localhost:8765/ws');
+
+  ws.current.onopen = () => {
+    ws.current?.send(JSON.stringify({ type: 'register', role: 'waiter' }));
+  };
 
   ws.current.onmessage = (message) => {
       const data = JSON.parse(message.data);
