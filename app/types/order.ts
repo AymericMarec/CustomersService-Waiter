@@ -1,5 +1,11 @@
 export type Order = {
   type: string;
-  dishes: string[];
-  table: number;
+  order: Dish[];
+  tableNumber: number;
 };
+
+type Dish = {
+  name: string;
+  description: string;
+  quantity: number;
+}

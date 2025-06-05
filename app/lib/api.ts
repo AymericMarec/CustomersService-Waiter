@@ -17,9 +17,7 @@ export async function GetDishes() {
         Aperitif:[]
     }
     for (const item of data){
-        console.log(item)
         const category = item.type as keyof Menu;
-        console.log(category)
         dishes[category].push(item);
     }
 

@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../styles/ReadyCommand';
 import { Order } from '../types/order';
@@ -14,10 +14,29 @@ export default function ReadyCommand() {
   };
 
   ws.current.onmessage = (message) => {
-      const data = JSON.parse(message.data);
-      setorders([...orders,data])
+    const data = JSON.parse(message.data);
+    data.order = JSON.parse(data.order);
+
+    setorders(prevOrders => {
+      const exists = prevOrders.some(order =>
+        JSON.stringify(order.order) === JSON.stringify(data.order) &&
+        order.tableNumber === data.tableNumber &&
+        order.type === data.type
+      );
+
+      if (exists) {
+        console.log('Commande déjà présente');
+        return prevOrders;
+      }
+
+      return [...prevOrders, data];
+    });
   };
 
+
+  useEffect(() => {
+  console.log('orders mis à jour :', orders);
+}, [orders]);
 
   return (
     <ScrollView style={styles.container}>
@@ -26,12 +45,12 @@ export default function ReadyCommand() {
         <View key={order.type} style={styles.card}>
           <View style={styles.header}>
             <Ionicons name="restaurant" size={28} color="#fff" style={{ marginRight: 8 }} />
-            <Text style={styles.tableNumber}>Table {order.table}</Text>
+            <Text style={styles.tableNumber}>Table {order.tableNumber}</Text>
           </View>
           <View style={styles.dishesRow}>
-            {order.dishes.map((dish, idx) => (
+            {order.order.map((dish, idx) => (
               <View key={idx} style={styles.chip}>
-                <Text style={styles.chipText}>{dish}</Text>
+                <Text style={styles.chipText}>{dish.name} x {dish.quantity}</Text>
               </View>
             ))}
           </View>
